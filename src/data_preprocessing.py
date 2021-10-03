@@ -39,6 +39,9 @@ description_features = ["description", 'features', 'accessories']
 feature_ls = [item for item in feature_ls if item not in description_features]
 print('STEP3: Remove {} features, there are {} features left.'.format(description_features, len(feature_ls)))
 
+# todo: add categorical features
+#
+
 """
 Summary so far: 
 - feature_ls: 21 features + 1 target
@@ -60,6 +63,7 @@ print('STEP4: Add {} features.'.format(date_added_feature_ls))
 numerical_features_ls = ['manufactured', 'curb_weight', 'power', 'engine_cap', 'no_of_owners', 'depreciation', 'coe', 'road_tax', 'dereg_value', 'mileage', 'omv']
 
 # step 6: processing the nan values in train and test dataset
+# todo: change this
 train_data = train_data.replace(np.nan, -1)
 test_data = test_data.replace(np.nan, -1)
 
