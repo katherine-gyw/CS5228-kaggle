@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import joblib
+import os
 from sklearn.model_selection import train_test_split, cross_val_score, KFold
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error
@@ -31,4 +32,6 @@ errors = mean_squared_error(test_labels, predictions)
 print(np.sqrt(errors))
 
 # save model
+if not os.path.exist('./models'):
+    os.mkdir('./models')
 joblib.dump(rf, './models/random_forest.joblib', compress=3)
