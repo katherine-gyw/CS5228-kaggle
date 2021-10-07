@@ -1,10 +1,10 @@
 import pandas as pd
 import numpy as np
 import os
-from src.help import add_date_features
+from help import add_date_features, add_desc_features
 
-ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
-os.chdir(ROOT_DIR)
+#ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+#os.chdir(ROOT_DIR)
 
 # load raw data
 train_data = pd.read_csv('./data/train.csv')
@@ -35,9 +35,10 @@ print("STEP2: Remove {} feature, there are {} features left.".format(unique_feat
 
 # step3: features with description words, and need additional processing
 # todo: process these features, then add them back
-description_features = ["description", 'features', 'accessories']
-feature_ls = [item for item in feature_ls if item not in description_features]
-print('STEP3: Remove {} features, there are {} features left.'.format(description_features, len(feature_ls)))
+description_features_ls = ["description", 'features', 'accessories', 'title']
+train_data, description_added_feature_ls = add_desc_features(train_data)
+test_data, _ = add_desc_features(test_data)
+print('STEP3: Add {} features.'.format(description_added_feature_ls))
 
 # todo: add categorical features
 #
@@ -68,6 +69,6 @@ train_data = train_data.replace(np.nan, -1)
 test_data = test_data.replace(np.nan, -1)
 
 target_ls = ['price']
-final_feature_ls = numerical_features_ls + date_added_feature_ls
+final_feature_ls = numerical_features_ls + date_added_feature_ls + description_added_feature_ls
 train_data[final_feature_ls+target_ls].to_csv('./data/train_clean.csv')
 test_data[final_feature_ls].to_csv('./data/test_clean.csv')

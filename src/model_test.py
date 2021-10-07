@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import joblib
 import os
+import datetime
 
 # load cleaned train data
 test_data = pd.read_csv('./data/test_clean.csv', index_col=0)
@@ -25,4 +26,4 @@ submission_df = pd.DataFrame()
 submission_df['Id'] = np.arange(0, 5000)
 submission_df['Predicted'] = submission_arr
 
-submission_df.to_csv('./submissions/submission2.csv', index=False)
+submission_df.to_csv('./submissions/submission-{}.csv'.format(str(datetime.datetime.now())), index=False)

@@ -1,5 +1,5 @@
 # Random Forest Hyper Parameters
-rf_n_estimators = [500, 1000]
+rf_n_estimators = [200, 500, 1000]
 rf_max_features = ['auto', 'sqrt']
 rf_criterion = ['mse']
 rf_min_samples_split = [2, 4]
@@ -11,7 +11,7 @@ rf_grid = {'n_estimators': rf_n_estimators,
            'min_samples_split': rf_min_samples_split}
 
 
-xgb_grid = {'n_estimators': [300, 500],
-            'max_depth': [4, 6],
-            'min_samples_split': [5],
+xgb_grid = {'n_estimators': [300, 500, 1000],
+            'max_depth': [2, 4, 6],
+            'min_samples_split': [2, 5],
             'learning_rate': [0.01, 0.05]}
