@@ -6,7 +6,7 @@ from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split, RandomizedSearchCV
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
 from sklearn.metrics import mean_squared_error
-from src.model_config import rf_grid, xgb_grid
+from model_config import rf_grid, xgb_grid
 
 target_feature = ['price']
 
