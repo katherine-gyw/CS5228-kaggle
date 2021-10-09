@@ -1,7 +1,7 @@
 # Random Forest Hyper Parameters
 rf_n_estimators = [200, 500, 1000]
 rf_max_features = ['auto', 'sqrt']
-rf_criterion = ['mse']
+rf_criterion = ['squared_error']
 rf_min_samples_split = [2, 4]
 
 # Create the grid

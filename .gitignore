@@ -1,0 +1,8 @@
+venv/
+.ipynb_checkpoints/
+.idea/
+data/
+models/
+.DS_Store
+__pycache__/
+*.csv

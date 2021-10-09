@@ -8,16 +8,17 @@ from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
 from sklearn.metrics import mean_squared_error
 from model_config import rf_grid, xgb_grid
 
-target_feature = ['price']
-
 # load cleaned train data
 train_data = pd.read_csv('./data/train_clean.csv', index_col=0)
+
+target_feature = 'price'
 feature_ls = [item for item in train_data.columns if item not in target_feature]
 print('Features used for model training: {}'.format(feature_ls))
 
+target_array = np.array(train_data[target_feature])
 # split the data into training and testing sets
 train_features, test_features, train_labels, test_labels = train_test_split(train_data[feature_ls],
-                                                                            train_data[target_feature],
+                                                                            target_array,
                                                                             test_size=0.25,
                                                                             random_state=42)
 # # Linear Regression
@@ -41,7 +42,6 @@ rf_predictions = rf_random.predict(test_features)
 rf_errors = mean_squared_error(test_labels, rf_predictions)
 print('Random Forest MSE: {}'.format(np.sqrt(rf_errors)))
 
-
 # XGB
 xgb_base = GradientBoostingRegressor()
 xgb_random = RandomizedSearchCV(estimator=xgb_base,
@@ -54,7 +54,6 @@ xgb_random.fit(train_features, train_labels)
 xgb_predictions = xgb_random.predict(test_features)
 xgb_errors = mean_squared_error(test_labels, xgb_predictions)
 print('XGB MSE: {}'.format(np.sqrt(xgb_errors)))
-
 
 # save model
 if not os.path.exists('./models'):
