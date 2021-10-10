@@ -1,0 +1,1 @@
+Features used for model training: ['manufactured', 'curb_weight', 'power', 'engine_cap', 'no_of_owners', 'depreciation', 'coe', 'road_tax', 'dereg_value', 'mileage', 'omv', 'reg_date_year', 'reg_date_mon', 'reg_date_day', 'lifespan_days']

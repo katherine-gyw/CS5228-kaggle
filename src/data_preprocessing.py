@@ -1,10 +1,8 @@
 import pandas as pd
 import numpy as np
 import os
-from src.help import add_date_features
+from help import add_date_features
 
-ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
-os.chdir(ROOT_DIR)
 
 # load raw data
 train_data = pd.read_csv('./data/train.csv')
