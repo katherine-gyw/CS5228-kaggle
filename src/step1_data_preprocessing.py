@@ -12,7 +12,7 @@ feature_ls = [item for item in train_data.columns if item != target_feature]
 print('Original feature list: {}'.format(feature_ls))
 
 
-# step1: remove features with >95% null values: [original_reg_date, opc_scheme, indicative_price]
+# step1: remove features with >70% null values: [original_reg_date, opc_scheme, indicative_price]
 null_percentage = train_data.isnull().sum()/train_data.shape[0]
 null_feature_ls = list(null_percentage[null_percentage > 0.7].index)
 feature_ls = [item for item in feature_ls if item not in null_feature_ls]
@@ -94,9 +94,9 @@ train_data = remove_outliers(train_data, mode='train')
 
 
 # step8: processing the nan values in train and test dataset
-print('STEP8: Replace nan values with -1.')
-train_data = train_data.replace(np.nan, -1)
-test_data = test_data.replace(np.nan, -1)
+print('STEP8: Replace nan values with column mean.')
+train_data = train_data.fillna(train_data.mean())
+test_data = test_data.replace(test_data.mean())
 
 
 print('After data preprocessing, there are {} rows, {} features in train dataset.'.format(train_data.shape[0], len(feature_ls)))

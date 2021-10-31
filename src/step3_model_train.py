@@ -5,12 +5,12 @@ import os
 import time
 import pickle as pkl
 from sklearn.model_selection import train_test_split, cross_val_score
-from sklearn.ensemble import GradientBoostingRegressor
+from sklearn.ensemble import GradientBoostingRegressor, RandomForestRegressor
 from sklearn.metrics import mean_squared_error
 from hyperopt import fmin, tpe, Trials
-from config import target_feature, model_xgb_pth, model_rf_pth, selected_features_save_pth, random_state,\
+from src.config import target_feature, model_xgb_pth, model_rf_pth, selected_features_save_pth, random_state,\
     train_clean_data_pth
-from config_model_hyper_params import param_hyperopt_gb
+from src.config_model_hyper_params import param_hyperopt_gb, param_hyperopt_rf
 
 
 # load cleaned train data
@@ -26,17 +26,12 @@ train_features, test_features, train_labels, test_labels = train_test_split(trai
                                                                             random_state=random_state)
 
 
-def bayesian_hyper_tuning_xgb(param_hyperopt_gb):
+def bayesian_hyper_tuning(param_hyperopt, regressor):
     start = time.time()
 
     def _fn(params):
-        params = {'max_depth': params['max_depth'],
-                  'max_features': params['max_features'],
-                  'learning_rate': params['learning_rate'],
-                  'n_estimators': params['n_estimators'],
-                  'subsample': params['subsample']}
-        gbm_bo2 = GradientBoostingRegressor(random_state=random_state, **params)
-        best_score = cross_val_score(gbm_bo2,
+        model = regressor(random_state=random_state, **params)
+        best_score = cross_val_score(model,
                                      train_features,
                                      train_labels,
                                      cv=5,
@@ -44,40 +39,40 @@ def bayesian_hyper_tuning_xgb(param_hyperopt_gb):
         return -best_score
 
     trials = Trials()
-    gbm_best_param = fmin(fn=_fn,
-                          space=param_hyperopt_gb,
-                          max_evals=75,
-                          trials=trials,
-                          rstate=np.random.RandomState(random_state),
-                          algo=tpe.suggest)
+    best_param = fmin(fn=_fn,
+                      space=param_hyperopt,
+                      max_evals=75,
+                      trials=trials,
+                      rstate=np.random.RandomState(random_state),
+                      algo=tpe.suggest)
 
-    loss = [x['result']['loss'] for x in trials.trials]
-    print(loss)
-    best_param_values = [x for x in gbm_best_param.values()]
     print('It takes %s minutes' % ((time.time() - start)/60))
-    return best_param_values
+    return best_param
 
 
-# hyper parameter tuning with bayesian optimization
-gbm_best_param = bayesian_hyper_tuning_xgb(param_hyperopt_gb)
-
-# fit model with best parameters found
-clf_best = GradientBoostingRegressor(learning_rate=gbm_best_param['learning_rate'],
+# XGB
+gbm_best_param = bayesian_hyper_tuning(param_hyperopt_gb, GradientBoostingRegressor)
+xgb_best = GradientBoostingRegressor(learning_rate=gbm_best_param['learning_rate'],
                                      max_depth=int(gbm_best_param['max_depth']),
                                      max_features=gbm_best_param['max_features'],
                                      n_estimators=int(gbm_best_param['n_estimators']),
-                                     subsample=gbm_best_param['subsample'],
-                                     loss='neg_root_mean_squared_error')
-clf_best.fit(train_features, train_labels)
-
-# calculate RMSE on test dataset
-xgb_test_rmse = np.sqrt(mean_squared_error(clf_best.predict(test_features), test_labels))
+                                     subsample=gbm_best_param['subsample'])
+xgb_best.fit(train_features, train_labels)
+xgb_test_rmse = np.sqrt(mean_squared_error(xgb_best.predict(test_features), test_labels))
 print('XGB test RMSE: {}'.format(xgb_test_rmse))
 
+# RF
+rf_best_param = bayesian_hyper_tuning(param_hyperopt_rf, RandomForestRegressor)
+rf_best = RandomForestRegressor(min_samples_split=rf_best_param['min_samples_split'],
+                                max_depth=int(rf_best_param['max_depth']),
+                                n_estimators=int(rf_best_param['n_estimators']))
+rf_best.fit(train_features, train_labels)
+rf_test_rmse = np.sqrt(mean_squared_error(rf_best.predict(test_features), test_labels))
+print('XGB test RMSE: {}'.format(rf_test_rmse))
 
 # save model
 if not os.path.exists('./models'):
     os.mkdir('./models')
 
-# joblib.dump(rf_random, model_rf_pth, compress=3)
-joblib.dump(model_xgb_pth, model_xgb_pth, compress=3)
+joblib.dump(rf_best, model_rf_pth, compress=3)
+joblib.dump(xgb_best, model_xgb_pth, compress=3)

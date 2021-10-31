@@ -26,3 +26,9 @@ param_hyperopt_gb = {
     'max_features': hp.uniform('max_features', 0.8, 1),
     'subsample': hp.uniform('subsample', 0.8, 1)
 }
+
+param_hyperopt_rf = {
+    'max_depth': scope.int(hp.quniform('max_depth', 20, 100, 10)),
+    'n_estimators': scope.int(hp.quniform('n_estimators', 50, 500, 50)),
+    'min_samples_split': scope.int(hp.quniform('min_samples_split', 2, 10, 1))
+}
