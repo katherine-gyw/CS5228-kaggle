@@ -1,8 +1,8 @@
 import pandas as pd
 import numpy as np
-from help import add_date_features, add_desc_features, generate_one_hot_data, process_categorical_features, remove_outliers
 from sklearn import preprocessing
-from config import train_data_pth, test_data_pth, train_clean_data_pth, test_clean_data_pth, target_feature
+from src.help import add_date_features, add_desc_features, generate_one_hot_data, process_categorical_features, remove_outliers
+from src.config import train_data_pth, test_data_pth, train_clean_data_pth, validation_clean_data_pth, test_clean_data_pth, target_feature
 
 
 # load data
@@ -93,13 +93,26 @@ print('STEP7: Remove outliers.')
 train_data = remove_outliers(train_data, mode='train')
 
 
+# take 20% train data as validation data
+N = train_data.shape[0]
+validation_data_idx = np.random.choice(range(N), int(N*0.2), replace=False)
+train_data_idx = list(set(range(N)) - set(validation_data_idx))
+train_data.reset_index(drop=True, inplace=True)
+validation_data = train_data.take(validation_data_idx)
+
+
 # step8: processing the nan values in train and test dataset
 print('STEP8: Replace nan values with column mean.')
+train_data = train_data.take(train_data_idx)
 train_data = train_data.fillna(train_data.mean())
-test_data = test_data.replace(test_data.mean())
+validation_data = validation_data.fillna(validation_data.mean())
+test_data = test_data.fillna(test_data.mean())
 
 
-print('After data preprocessing, there are {} rows, {} features in train dataset.'.format(train_data.shape[0], len(feature_ls)))
+print('Finish data preprocessing')
+print('There are {} rows, {} features in train dataset.'.format(train_data.shape[0], len(feature_ls)))
+print('There are {} rows, {} features in validation dataset.'.format(validation_data.shape[0], len(feature_ls)))
 print(feature_ls)
 train_data[feature_ls+[target_feature]].to_csv(train_clean_data_pth)
+validation_data[feature_ls+[target_feature]].to_csv(validation_clean_data_pth)
 test_data[feature_ls].to_csv(test_clean_data_pth)

@@ -2,8 +2,10 @@ from datetime import datetime
 import numpy as np
 import pandas as pd
 import pickle
-vectorizer = pickle.load(open('../models/vectorizer', 'rb'))
-word_price_map = pickle.load(open('../models/word_price_map.dict', 'rb'))
+from src.config import vectorizer_pth, word_dict_pth
+
+vectorizer = pickle.load(open(vectorizer_pth, 'rb'))
+word_price_map = pickle.load(open(word_dict_pth, 'rb'))
 
 
 def add_date_features(data, date_ls):
