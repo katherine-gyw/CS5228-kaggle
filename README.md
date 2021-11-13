@@ -9,9 +9,12 @@ Contains codes for CS5228 Kaggle car resale price prediciton.
     * test.csv
     
 2. install all needed packages listed in requirements.txt
+   
+3. Change `project_root_dir` to your local path in ./src/config.py
 3. run the scripts 
-    * ./src/data_preprocessing.py
-    * ./src/model_train.py
-    * ./src/model_test.py
+    * ./src/step1_data_preprocessing.py
+    * ./src/step2_feature_selection.py
+    * ./src/step3_model_train.py
+    * ./src/step4_model_test.py
     
 4. submit ./submissions/your_submission.csv in kaggle
