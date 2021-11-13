@@ -2,10 +2,9 @@ from datetime import datetime
 import numpy as np
 import pandas as pd
 import pickle
+import os
+from sklearn.feature_extraction.text import TfidfVectorizer
 from src.config import vectorizer_pth, word_dict_pth
-
-vectorizer = pickle.load(open(vectorizer_pth, 'rb'))
-word_price_map = pickle.load(open(word_dict_pth, 'rb'))
 
 
 def add_date_features(data, date_ls):
@@ -27,9 +26,34 @@ def add_date_features(data, date_ls):
     return data, date_added_features_ls
 
 
+def generate_word_price_map(df, description_ls):
+    if os.path.exists(word_dict_pth) and os.path.exists(vectorizer_pth):
+        word_price_map = pickle.load(open(word_dict_pth, 'rb'))
+        vectorizer = pickle.load(open(vectorizer_pth, 'rb'))
+    else:
+        print('It will take veryy long time to generate word_price_map.')
+        vectorizer = TfidfVectorizer()
+        vectors = vectorizer.fit_transform(description_ls)
+        feature_names = vectorizer.get_feature_names()
+        word_price_map = {k: [] for k in range(len(feature_names) + 1)}
+        analyzer = vectorizer.build_analyzer()
+
+        def tokenize(s, vectorizer, analyzer):
+            # OOV word will be assigned to the last index
+            r = list(map(lambda x: vectorizer.vocabulary_.get(x, len(vectorizer.get_feature_names())), analyzer(s)))
+            return sorted(set(r))
+
+        for price, desc in zip(df['price'], df['desc_concat']):
+            tl = tokenize(desc, vectorizer, analyzer)
+            for i in tl:
+                word_price_map[i].append(price)
+        pickle.dump(word_price_map, open(word_dict_pth, 'wb'))
+        pickle.dump(vectorizer, open(vectorizer_pth, 'wb'))
+    return word_price_map, vectorizer
+
+
 def add_desc_features(df):
     N = 5
-
     title_ls = df.title.tolist()
     description_ls = df.description.tolist()
     features_ls = df.features.tolist()
@@ -39,7 +63,8 @@ def add_desc_features(df):
         str(title_ls[i]) + " " + str(description_ls[i]) + " " + str(features_ls[i]) + " " + str(accessories_ls[i])
         for i in range(len(title_ls))]
 
-    # df = pd.concat((df, pd.DataFrame(description_ls, columns=['desc_concat'])), axis=1)
+    df = pd.concat((df, pd.DataFrame(description_ls, columns=['desc_concat'])), axis=1)
+    word_price_map, vectorizer = generate_word_price_map(df, description_ls)
 
     vectors = vectorizer.transform(description_ls)
     dense = vectors.todense()
